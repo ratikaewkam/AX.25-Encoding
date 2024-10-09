@@ -19,7 +19,7 @@ ax:     e2 11100010
 Source SSID
 info: 2 32 00110010
 sfl:    64 01100100
-ax:      65 01100101
+ax:     65 01100101
 
 -----------------
 Destination SSID
