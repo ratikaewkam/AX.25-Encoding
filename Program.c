@@ -13,6 +13,30 @@ void headAX(char data[], int n)
     }
 }
 
+void srcSSID_AX(char data[], int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++)
+    {
+        data[i] = data[i] << 1;
+        data[i]  = data[i] | 1;
+        printf("%X ", data[i]);
+    }
+}
+
+void destSSID_AX(char data[], int n)
+{
+    int i;
+    
+    for (i = 0; i < n; i++)
+    {
+        data[i] = data[i] << 1;
+        data[i]  = data[i] | 128;
+        printf("%X ", data[i]);
+    }
+}
+
 void pinAX(int pin)
 {
     printf("%X ", pin);
@@ -46,11 +70,12 @@ int main()
     int nDestSSID = strlen(destSSID);
     int nPayload = strlen(payload);
 
-    // AX.25 Frame
-    // Type Command
+    // AX.25 Frame -> Type Command
 
     headAX(dest, nDest);
+    destSSID_AX(destSSID, nDestSSID);
     headAX(source, nSource);
+    srcSSID_AX(sourceSSID, nSourceSSID);
     pinAX(control);
     pinAX(PID);
     dataAX(payload, nPayload);
