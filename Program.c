@@ -2,13 +2,23 @@
 #include <string.h>
 #include <stdlib.h>
 
-void outHead(char data[], int n)
+void headAX(char data[], int n)
 {
     int i;
 
     for (i = 0; i < n; i++)
     {
         data[i] = data[i] << 1;
+        printf("%X ", data[i]);
+    }
+}
+
+void dataAX(char data[], int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++)
+    {
         printf("%X ", data[i]);
     }
 }
@@ -32,8 +42,9 @@ int main()
     int nPayload = strlen(payload);
 
     // AX.25 Frame
-    outHead(dest, nDest);
-    // outHead(source, nSource);
+    headAX(dest, nDest);
+    headAX(source, nSource);
+    dataAX(payload, nPayload);
 
     return 0;
 }
