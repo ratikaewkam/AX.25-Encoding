@@ -13,6 +13,11 @@ void headAX(char data[], int n)
     }
 }
 
+void pinAX(int pin)
+{
+    printf("%X ", pin);
+}
+
 void dataAX(char data[], int n)
 {
     int i;
@@ -26,7 +31,7 @@ void dataAX(char data[], int n)
 int main()
 {
     // Data
-    char source[7] = "N7LEM  ";
+    char source[7] = "N7LEM ";
     char sourceSSID[2] = "0";
     char dest[7] = "NJ7P  ";
     char destSSID[2] = "0";
@@ -42,8 +47,12 @@ int main()
     int nPayload = strlen(payload);
 
     // AX.25 Frame
+    // Type Command
+
     headAX(dest, nDest);
     headAX(source, nSource);
+    pinAX(control);
+    pinAX(PID);
     dataAX(payload, nPayload);
 
     return 0;
