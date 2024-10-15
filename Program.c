@@ -13,6 +13,10 @@ struct data
     unsigned short int control;
     char payload[256];
     unsigned short int iscmd;
+    /*
+        1: Command
+        0: Response
+    */
 };
 
 // Encode data
