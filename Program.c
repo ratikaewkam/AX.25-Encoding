@@ -2,83 +2,117 @@
 #include <string.h>
 #include <stdlib.h>
 
-void headAX(char data[], int n)
+// Raw data
+struct data
 {
+    char src[7];
+    unsigned short int srcSSID;
+    char dst[7];
+    unsigned short int dstSSID;
+    unsigned short int pid;
+    unsigned short int control;
+    char payload[256];
+    unsigned short int iscmd;
+};
+
+// Encode data
+struct frame
+{
+    // To prevent negative values and save memory, use unsigned short int
+    unsigned short int src[7];
+    unsigned short int srcSSID;
+    unsigned short int dst[7];
+    unsigned short int dstSSID;
+    unsigned short int pid;
+    unsigned short int control;
+    unsigned short int payload[256];
+};
+
+struct frame encode2ax(struct data dt)
+{
+    struct frame fm;
     int i;
 
-    for (i = 0; i < n; i++)
+    for (i = 0; i < 6; i++)
     {
-        data[i] = data[i] << 1;
-        printf("%X ", data[i]);
+        if (dt.src[i] == 0)
+        {
+            dt.src[i] = 0x20; // 0x20 = space
+        }
+
+        if (dt.dst[i] == 0)
+        {
+            dt.dst[i] = 0x20;
+        }
+
+        fm.src[i] = (dt.src[i] & 0xff) << 1;
+        fm.dst[i] = (dt.dst[i] & 0xff) << 1;
     }
-}
 
-void srcSSID_AX(char data[], int n)
-{
-    int i;
-
-    for (i = 0; i < n; i++)
+    for (i = 0; i < 255; i++)
     {
-        data[i] = data[i] << 1;
-        data[i]  = data[i] | 1;
-        printf("%X ", data[i]);
+        fm.payload[i] = dt.payload[i] & 0xff;
     }
-}
 
-void destSSID_AX(char data[], int n)
-{
-    int i;
-    
-    for (i = 0; i < n; i++)
+    // Range of SSID (0-15)
+    fm.dstSSID = ((dt.dstSSID & 0x0f) << 1) + 0x60;
+    if (dt.iscmd == 1)
     {
-        data[i] = data[i] << 1;
-        data[i]  = data[i] | 128;
-        printf("%X ", data[i]);
+        fm.dstSSID += 0x80;
     }
+
+    fm.srcSSID = ((dt.srcSSID & 0x0f) << 1) + 0x60;
+    if (dt.iscmd == 0)
+    {
+        fm.srcSSID += 0x80;
+    }
+
+    fm.srcSSID += 0x01;
+
+    fm.pid = dt.pid & 0xff;
+    fm.control = dt.control & 0xff;
+
+    return fm;
 }
 
-void pinAX(int pin)
-{
-    printf("%X ", pin);
-}
-
-void dataAX(char data[], int n)
+void outputFrame(struct frame fm)
 {
     int i;
 
-    for (i = 0; i < n; i++)
+    for (i = 0; i < 6; i++)
     {
-        printf("%X ", data[i]);
+        printf("0x%x ", fm.dst[i]);
+    }
+
+    printf("0x%x ", fm.dstSSID);
+
+    for (i = 0; i < 6; i++)
+    {
+        printf("0x%x ", fm.src[i]);
+    }
+
+    printf("0x%x ", fm.srcSSID);
+    printf("0x%x ", fm.control);
+    printf("0x%x ", fm.pid);
+
+    for (i = 0; i < 255; i++)
+    {
+        if (fm.payload[i] == 0)
+        {
+            printf("");
+        }
+        else
+        {
+            printf("0x%x ", fm.payload[i]);
+        }
     }
 }
 
 int main()
 {
-    // Data
-    char source[7] = "N7LEM ";
-    char sourceSSID[2] = "0";
-    char dest[7] = "NJ7P  ";
-    char destSSID[2] = "0";
-    int PID = 240;
-    int control = 3;
-    char payload[256] = "The quick brown fox jumps over the lazy dog";
-
-    // Length of array
-    int nSource = strlen(source);
-    int nSourceSSID = strlen(sourceSSID);
-    int nDest = strlen(dest);
-    int nDestSSID = strlen(destSSID);
-    int nPayload = strlen(payload);
-
-    // AX.25 Frame -> Type Command
-
-    headAX(dest, nDest);
-    destSSID_AX(destSSID, nDestSSID);
-    headAX(source, nSource);
-    srcSSID_AX(sourceSSID, nSourceSSID);
-    pinAX(control);
-    pinAX(PID);
-    dataAX(payload, nPayload);
+    struct data dt = {"N7LEM", 0, "NJ7P", 0, 0xf0, 0x03, "The quick brown fox jumps over the lazy dog", 1}; // Data frame
+    struct frame fm = encode2ax(dt); // Encode data frame to AX.25 frame
+    outputFrame(fm); // Print data in AX.25 frame
 
     return 0;
 }
