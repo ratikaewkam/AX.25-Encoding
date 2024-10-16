@@ -41,6 +41,7 @@ unsigned char reverseBits(unsigned char byte)
     return byte;
 }
 
+// This function encode raw data to AX.25 frame and encode to HDLC frame (Reverse Bits)
 struct frame encode2HDLC(struct data dt)
 {
     struct frame fm;
