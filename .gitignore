@@ -53,3 +53,7 @@ dkms.conf
 
 # json
 *.json
+
+# test c file
+ReverseBits.c
+FrameReverseBits.c
