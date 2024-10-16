@@ -30,8 +30,7 @@ unsigned char reverseBitsV2(unsigned char data)
 
 int main()
 {
-    clock_t time;
-    float start, end = 0;
+    clock_t time1, time2;
     int iter = 100000000;
     int i;
 
@@ -43,27 +42,27 @@ int main()
     printf("0x%x 0x%x\n", data, x);
     printf("0x%x 0x%x\n", data, y);
 
-    start = clock();
+    time1 = clock();
     for (i = 0; i < iter; i++)
     {
         reverseBitsV1(data);
     }
 
-    end = clock();
-    float t1 = ((float)(end - start) / CLOCKS_PER_SEC);
+    time1 = clock() - time1;
+    float t1 = ((float)time1 / CLOCKS_PER_SEC);
 
-    start = clock();
+    time2 = clock();
     for (i = 0; i < iter; i++)
     {
         reverseBitsV2(data);
     }
 
-    end = clock();
-    float t2 = ((float)(end - start) / CLOCKS_PER_SEC);
+    time2 = clock() - time2;
+    float t2 = ((float)time2 / CLOCKS_PER_SEC);
 
     printf("Time for v1: %fs\n", t1);
     printf("Time for v2: %fs\n", t2);
-    printf("Faster: %f%%", (t1-t2)*100/t1);
+    printf("Faster: %f%%", (t1 - t2) * 100 / t1);
 
     /*
         Time for v1: 1.841000s
