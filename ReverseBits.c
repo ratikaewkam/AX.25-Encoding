@@ -35,7 +35,7 @@ int main()
     int iter = 100000000;
     int i;
 
-    // short int 2 bytes = 16 bits
+    // unsigned char 1 bytes = 8 bits
     unsigned char data = 0xda; // 11011010
     // Reverse bits => 01011011 0x5b
     unsigned char x = reverseBitsV1(data);
