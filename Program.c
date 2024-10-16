@@ -6,13 +6,13 @@
 struct data
 {
     char src[7];
-    unsigned short int srcSSID;
+    unsigned char srcSSID;
     char dst[7];
-    unsigned short int dstSSID;
-    unsigned short int pid;
-    unsigned short int control;
+    unsigned char dstSSID;
+    unsigned char pid;
+    unsigned char control;
     char payload[256];
-    unsigned short int iscmd;
+    unsigned char iscmd;
     /*
         1: Command
         0: Response
@@ -22,23 +22,23 @@ struct data
 // Encode data
 struct frame
 {
-    // To prevent negative values and save memory, use unsigned short int
-    unsigned short int src[7];
-    unsigned short int srcSSID;
-    unsigned short int dst[7];
-    unsigned short int dstSSID;
-    unsigned short int pid;
-    unsigned short int control;
-    unsigned short int payload[256];
+    // To prevent negative values and save memory, use unsigned char
+    unsigned char src[7];
+    unsigned char srcSSID;
+    unsigned char dst[7];
+    unsigned char dstSSID;
+    unsigned char pid;
+    unsigned char control;
+    unsigned char payload[256];
 };
 
-unsigned short int reverseBits(unsigned short int x)
+unsigned char reverseBits(unsigned char byte)
 {
-    x = ((x >> 1) & 0x55) | ((x & 0x55) << 1);
-    x = ((x >> 2) & 0x33) | ((x & 0x33) << 2);
-    x = ((x >> 4) & 0x0f) | ((x & 0x0f) << 4);
+    byte = ((byte & 0xf0) >> 4) | ((byte & 0x0f) << 4);
+    byte = ((byte & 0xcc) >> 2) | ((byte & 0x33) << 2);
+    byte = ((byte & 0xaa) >> 1) | ((byte & 0x55) << 1);
 
-    return x;
+    return byte;
 }
 
 struct frame encode2HDLC(struct data dt)
