@@ -32,7 +32,16 @@ struct frame
     unsigned short int payload[256];
 };
 
-struct frame encode2ax(struct data dt)
+unsigned short int reverseBits(unsigned short int x)
+{
+    x = ((x >> 1) & 0x55) | ((x & 0x55) << 1);
+    x = ((x >> 2) & 0x33) | ((x & 0x33) << 2);
+    x = ((x >> 4) & 0x0f) | ((x & 0x0f) << 4);
+
+    return x;
+}
+
+struct frame encode2HDLC(struct data dt)
 {
     struct frame fm;
     int i;
@@ -49,13 +58,13 @@ struct frame encode2ax(struct data dt)
             dt.dst[i] = 0x20;
         }
 
-        fm.src[i] = (dt.src[i] & 0xff) << 1;
-        fm.dst[i] = (dt.dst[i] & 0xff) << 1;
+        fm.src[i] = reverseBits((dt.src[i] & 0xff) << 1);
+        fm.dst[i] = reverseBits((dt.dst[i] & 0xff) << 1);
     }
 
     for (i = 0; i < 255; i++)
     {
-        fm.payload[i] = dt.payload[i] & 0xff;
+        fm.payload[i] = reverseBits(dt.payload[i] & 0xff);
     }
 
     // Range of SSID (0-15)
@@ -65,6 +74,8 @@ struct frame encode2ax(struct data dt)
         fm.dstSSID += 0x80;
     }
 
+    fm.dstSSID = reverseBits(fm.dstSSID);
+
     fm.srcSSID = ((dt.srcSSID & 0x0f) << 1) + 0x60;
     if (dt.iscmd == 0)
     {
@@ -72,9 +83,10 @@ struct frame encode2ax(struct data dt)
     }
 
     fm.srcSSID += 0x01;
+    fm.srcSSID = reverseBits(fm.srcSSID);
 
-    fm.pid = dt.pid & 0xff;
-    fm.control = dt.control & 0xff;
+    fm.pid = reverseBits(dt.pid & 0xff);
+    fm.control = reverseBits(dt.control & 0xff);
 
     return fm;
 }
@@ -115,8 +127,8 @@ void outputFrame(struct frame fm)
 int main()
 {
     struct data dt = {"N7LEM", 0, "NJ7P", 0, 0xf0, 0x03, "The quick brown fox jumps over the lazy dog", 1}; // Data frame
-    struct frame fm = encode2ax(dt); // Encode data frame to AX.25 frame
-    outputFrame(fm); // Print data in AX.25 frame
+    struct frame fm = encode2HDLC(dt);                                                                        // Encode data frame to AX.25 frame
+    outputFrame(fm);                                                                                        // Print data in AX.25 frame
 
     return 0;
 }
