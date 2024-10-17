@@ -19,19 +19,6 @@ struct data
     */
 };
 
-// Encode data
-struct frame
-{
-    // To prevent negative values and save memory, use unsigned char
-    unsigned char src[7];
-    unsigned char srcSSID;
-    unsigned char dst[7];
-    unsigned char dstSSID;
-    unsigned char pid;
-    unsigned char control;
-    unsigned char payload[256];
-};
-
 unsigned char reverseBits(unsigned char byte)
 {
     byte = ((byte & 0xf0) >> 4) | ((byte & 0x0f) << 4);
@@ -41,95 +28,91 @@ unsigned char reverseBits(unsigned char byte)
     return byte;
 }
 
-// This function encode raw data to AX.25 frame and encode to HDLC frame (Reverse Bits)
-struct frame encode2HDLC(struct data dt)
+unsigned char *data2frame(struct data dt, unsigned int *size)
 {
-    struct frame fm;
-    int i;
+    unsigned int mem = 17 + strlen(dt.payload);
+    unsigned char *frame = (unsigned char *)malloc(mem * sizeof(unsigned char));
+    int i, j;
 
-    for (i = 0; i < 6; i++)
+    frame[0] = 0x7e;
+
+    j = 0;
+    for (i = 1; i < 7; i++)
     {
-        if (dt.src[i] == 0)
+        if (dt.dst[j] == 0)
         {
-            dt.src[i] = 0x20; // 0x20 = space
+            dt.dst[j] = 0x20; // 0x20 = space
         }
 
-        if (dt.dst[i] == 0)
-        {
-            dt.dst[i] = 0x20;
-        }
+        frame[i] = reverseBits((dt.dst[j] & 0xff) << 1);
 
-        fm.src[i] = reverseBits((dt.src[i] & 0xff) << 1);
-        fm.dst[i] = reverseBits((dt.dst[i] & 0xff) << 1);
-    }
-
-    for (i = 0; i < 255; i++)
-    {
-        fm.payload[i] = reverseBits(dt.payload[i] & 0xff);
+        j++;
     }
 
     // Range of SSID (0-15)
-    fm.dstSSID = ((dt.dstSSID & 0x0f) << 1) + 0x60;
+    frame[7] = ((dt.dstSSID & 0x0f) << 1) + 0x60;
     if (dt.iscmd == 1)
     {
-        fm.dstSSID += 0x80;
+        frame[7] += 0x80;
     }
 
-    fm.dstSSID = reverseBits(fm.dstSSID);
+    frame[7] = reverseBits(frame[7]);
 
-    fm.srcSSID = ((dt.srcSSID & 0x0f) << 1) + 0x60;
+    j = 0;
+    for (i = 8; i < 14; i++)
+    {
+        if (dt.src[j] == 0)
+        {
+            dt.src[j] = 0x20; // 0x20 = space
+        }
+
+        frame[i] = reverseBits((dt.src[j] & 0xff) << 1);
+
+        j++;
+    }
+
+    frame[14] = ((dt.srcSSID & 0x0f) << 1) + 0x60;
     if (dt.iscmd == 0)
     {
-        fm.srcSSID += 0x80;
+        frame[14] += 0x80;
     }
 
-    fm.srcSSID += 0x01;
-    fm.srcSSID = reverseBits(fm.srcSSID);
+    frame[14] += 0x01;
+    frame[14] = reverseBits(frame[14]);
 
-    fm.pid = reverseBits(dt.pid & 0xff);
-    fm.control = reverseBits(dt.control & 0xff);
+    frame[15] = reverseBits(dt.control & 0xff);
+    frame[16] = reverseBits(dt.pid & 0xff);
 
-    return fm;
+    j = 0;
+    for (i = 17; i < mem; i++)
+    {
+        frame[i] = reverseBits(dt.payload[j] & 0xff);
+        j++;
+    }
+
+    *size = mem;
+
+    return frame;
 }
 
-void outputFrame(struct frame fm)
+void output(unsigned char *frame, unsigned int size)
 {
     int i;
 
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < size; i++)
     {
-        printf("0x%x ", fm.dst[i]);
-    }
-
-    printf("0x%x ", fm.dstSSID);
-
-    for (i = 0; i < 6; i++)
-    {
-        printf("0x%x ", fm.src[i]);
-    }
-
-    printf("0x%x ", fm.srcSSID);
-    printf("0x%x ", fm.control);
-    printf("0x%x ", fm.pid);
-
-    for (i = 0; i < 255; i++)
-    {
-        if (fm.payload[i] == 0)
-        {
-            printf("");
-        }
-        else
-        {
-            printf("0x%x ", fm.payload[i]);
-        }
+        printf("0x%x ", frame[i]);
     }
 }
 
 int main()
 {
     struct data dt = {"N7LEM", 0, "NJ7P", 0, 0xf0, 0x03, "The quick brown fox jumps over the lazy dog", 1}; // Data frame
-    struct frame fm = encode2HDLC(dt);                                                                        // Encode data frame to AX.25 frame
-    outputFrame(fm);                                                                                        // Print data in AX.25 frame
+    unsigned int size;
+    unsigned char *frame = data2frame(dt, &size);
+    output(frame, size);
+
+    free(frame);
 
     return 0;
 }
