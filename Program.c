@@ -140,7 +140,6 @@ unsigned char *ax_frame2HDLC(unsigned char *frame, unsigned int frame_size, unsi
     }
 
     unsigned short int crc = crc16cal(frame, frame_size);
-    printf("%d %x", crc, crc);
     encode_frame[mem - 3] = ((crc >> 8) & 0xff);
     encode_frame[mem - 2] = (crc & 0xff);
 
@@ -157,6 +156,26 @@ void output(unsigned char *frame, unsigned int size)
     {
         printf("%d-0x%x ", i, frame[i]);
         // printf("0x%x ", frame[i]);
+    }
+}
+
+void frame2bin(unsigned char *hdlc_frame, unsigned int hdlc_frame_size)
+{
+    unsigned char temp[9];
+    int i, j, k;
+
+    for (i = 1; i < 20; i++)
+    {
+        for (j = 0; j < 8; j++)
+        {
+            temp[j] = hdlc_frame[i] % 2;
+            hdlc_frame[i] /= 2;
+        }
+        for (k = 7; k > -1; k--)
+        {
+            printf("%d", temp[k]);
+        }
+        printf(" ");
     }
 }
 
@@ -190,6 +209,8 @@ int main()
                             0x20, 0x6C, 0x61, 0x7A, 0x79, 0x20, 0x64, 0x6F, 0x67};
 
     printf("%d", sizeof(data) / sizeof(data[0]));*/
+
+    frame2bin(hdlc_frame, hdlc_frame_size);
 
     return 0;
 }
