@@ -28,65 +28,67 @@ unsigned char reverseBits(unsigned char byte)
     return byte;
 }
 
-unsigned char *data2frame(struct data dt, unsigned int *size)
+short int crc16cal(unsigned char *frame, unsigned int *size)
 {
-    unsigned int mem = 17 + strlen(dt.payload);
+    short int crc = 0xffff;
+    int i;
+}
+
+unsigned char *data2ax_frame(struct data dt, unsigned int *size)
+{
+    unsigned int mem = 16 + strlen(dt.payload);
     unsigned char *frame = (unsigned char *)malloc(mem * sizeof(unsigned char));
     int i, j;
 
-    frame[0] = 0x7e;
-
     j = 0;
-    for (i = 1; i < 7; i++)
+    for (i = 0; i < 6; i++)
     {
         if (dt.dst[j] == 0)
         {
             dt.dst[j] = 0x20; // 0x20 = space
         }
 
-        frame[i] = reverseBits((dt.dst[j] & 0xff) << 1);
-
+        frame[i] = (dt.dst[j] & 0xff) << 1;
         j++;
     }
 
     // Range of SSID (0-15)
-    frame[7] = ((dt.dstSSID & 0x0f) << 1) + 0x60;
+    frame[6] = ((dt.dstSSID & 0x0f) << 1) + 0x60;
     if (dt.iscmd == 1)
     {
-        frame[7] += 0x80;
+        frame[6] += 0x80;
     }
 
-    frame[7] = reverseBits(frame[7]);
+    frame[6] = frame[6];
 
     j = 0;
-    for (i = 8; i < 14; i++)
+    for (i = 7; i < 13; i++)
     {
         if (dt.src[j] == 0)
         {
             dt.src[j] = 0x20; // 0x20 = space
         }
 
-        frame[i] = reverseBits((dt.src[j] & 0xff) << 1);
-
+        frame[i] = (dt.src[j] & 0xff) << 1;
         j++;
     }
 
-    frame[14] = ((dt.srcSSID & 0x0f) << 1) + 0x60;
+    frame[13] = ((dt.srcSSID & 0x0f) << 1) + 0x60;
     if (dt.iscmd == 0)
     {
-        frame[14] += 0x80;
+        frame[13] += 0x80;
     }
 
-    frame[14] += 0x01;
-    frame[14] = reverseBits(frame[14]);
+    frame[13] += 0x01;
+    frame[13] = frame[13];
 
-    frame[15] = reverseBits(dt.control & 0xff);
-    frame[16] = reverseBits(dt.pid & 0xff);
+    frame[14] = dt.control & 0xff;
+    frame[15] = dt.pid & 0xff;
 
     j = 0;
-    for (i = 17; i < mem; i++)
+    for (i = 16; i < mem; i++)
     {
-        frame[i] = reverseBits(dt.payload[j] & 0xff);
+        frame[i] = dt.payload[j] & 0xff;
         j++;
     }
 
@@ -101,6 +103,7 @@ void output(unsigned char *frame, unsigned int size)
 
     for (i = 0; i < size; i++)
     {
+        // printf("%d-0x%x ", i, frame[i]);
         printf("0x%x ", frame[i]);
     }
 }
@@ -109,7 +112,9 @@ int main()
 {
     struct data dt = {"N7LEM", 0, "NJ7P", 0, 0xf0, 0x03, "The quick brown fox jumps over the lazy dog", 1}; // Data frame
     unsigned int size;
-    unsigned char *frame = data2frame(dt, &size);
+    unsigned char *frame = data2ax_frame(dt, &size);
+    
+    printf("AX.25 Frame:\n");
     output(frame, size);
 
     free(frame);
