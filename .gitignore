@@ -55,5 +55,4 @@ dkms.conf
 *.json
 
 # test c file
-ReverseBits.c
-FrameReverseBits.c
+/test
