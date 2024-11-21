@@ -8,14 +8,14 @@ This program demonstrates the process of generating an AX.25 frame, calculating 
 1. [Overview](https://github.com/ratikaewkam/AX.25-Encoding#overview)
 2. [Data structure](https://github.com/ratikaewkam/AX.25-Encoding#data-stucture)
 3. [Functions](https://github.com/ratikaewkam/AX.25-Encoding#functions)
-        - [reverseBits](https://github.com/ratikaewkam/AX.25-Encoding#reversebits)
-        - [data2frame](https://github.com/ratikaewkam/AX.25-Encoding#data2frame)
-        - [addcrc](https://github.com/ratikaewkam/AX.25-Encoding#addcrc)
-        - [crc16cal](https://github.com/ratikaewkam/AX.25-Encoding#crc16cal)
-        - [bitStuffing](https://github.com/ratikaewkam/AX.25-Encoding#bitstuffing)
-        - [output](https://github.com/ratikaewkam/AX.25-Encoding#output)
-4. [Main flow](https://github.com/ratikaewkam/AX.25-Encoding?tab=readme-ov-file#main-flow)
-5. [Memory management](https://github.com/ratikaewkam/AX.25-Encoding?tab=readme-ov-file#memory-management)
+   - [reverseBits](https://github.com/ratikaewkam/AX.25-Encoding#reversebits)
+   - [data2frame](https://github.com/ratikaewkam/AX.25-Encoding#data2frame)
+   - [addcrc](https://github.com/ratikaewkam/AX.25-Encoding#addcrc)
+   - [crc16cal](https://github.com/ratikaewkam/AX.25-Encoding#crc16cal)
+   - [bitStuffing](https://github.com/ratikaewkam/AX.25-Encoding#bitstuffing)
+   - [output](https://github.com/ratikaewkam/AX.25-Encoding#output)
+5. [Main flow](https://github.com/ratikaewkam/AX.25-Encoding?tab=readme-ov-file#main-flow)
+6. [Memory management](https://github.com/ratikaewkam/AX.25-Encoding?tab=readme-ov-file#memory-management)
 
 ### Overview
 
